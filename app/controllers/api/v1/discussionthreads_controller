@@ -1,0 +1,57 @@
+module Api
+  module V1
+    class DiscussionthreadsController < ApiController
+      def index
+        discussionthreads = Discussionthread.all
+
+        render json: DiscussionthreadSerializer, new(discussionthreads, options).serialized_json
+      end
+
+      def show
+        discussionthread = Discussionthread.find_by(slug: params[:slug])
+
+        render json: DiscussionthreadSerializer.new(discussionthread, options).serialized_json
+      end
+
+      def create 
+        discussionthread = Discussionthread.new(discussionthread_params)
+
+        if discussionthread.save
+          render json: DiscussionthreadSerializer.new(discussionthread).serialized_json
+        else
+          render json: { error: discussionthread.errors.messages }, status: 422
+        end
+      end
+
+      def update 
+        discussionthread = Discussionthread.find_by(slug: params[:slug])
+
+        if discussionthread.update(discussionthread_params)
+          render json: DiscussionthreadSerializer.new(discussionthread, options).serialized_json
+        else
+          render json: { error: discussionthread.errors.messages }, status: 422
+        end
+      end
+
+      def destroy 
+        discussionthread = Discussionthread.find_by(slug: params[:slug])
+
+        if discussionthread.destroy(discussionthread_params)
+          head :no_content
+        else
+          render json: { error: discussionthread.errors.messages }, status: 422
+        end
+      end
+
+      private
+
+      def discussionthread_params
+        params.require(:discussionthread).permit(:title, :creator. :date, :slug)
+      end
+
+      def options
+        @options ||= { include: %i[replies] } 
+      end
+    end
+  end
+end
